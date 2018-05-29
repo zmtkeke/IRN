@@ -296,7 +296,7 @@ def main(_):
                         if val_true_acc > best_val_true_acc:
                             best_val_true_acc = val_true_acc
                             best_val_epoch = t
-                            best_test_acc = test_acc
+                            best_test_acc = test_true_acc
                             #model.store()
 
                         print('-----------------------')
