@@ -16,7 +16,7 @@ flags.DEFINE_string("model","IRN", "model name [IRN/KVMemN2N/MemN2N/Embed/Subgra
 flags.DEFINE_integer("feature", 20, "internal state dimension [20]")
 flags.DEFINE_integer("edim", 50, "words vector dimension [50]")
 flags.DEFINE_integer("lindim", 75, "linear part of the state [75]")
-flags.DEFINE_integer("nhop", 3, "number of hops [2/3]")
+flags.DEFINE_integer("nhop", 3, "number of hops [2/3+1]")
 flags.DEFINE_integer("mem_size", 100, "memory size [100]")
 flags.DEFINE_integer("batch_size", 50, "batch size to use during training [50]")
 flags.DEFINE_integer("nepoch", 1000, "number of epoch to use during training [1000]")
@@ -33,14 +33,14 @@ flags.DEFINE_boolean("unseen",False,"True to hide 3 relations when training [Fal
 FLAGS = flags.FLAGS
 if FLAGS.dataset == 'wc':
     FLAGS.data_dir = "data/WC2014"
-    FLAGS.data_file = "WC-P2" #"WC-C/P1/P2/P"
+    FLAGS.data_file = "WC-P" #"WC-C/P1/P2/P"
     FLAGS.KB_file = "WC2014"
 elif FLAGS.dataset == 'pql':
     FLAGS.data_dir = "data/PQL"
     df_list = ['2hop','3hop']
     kb_list = ['exact_2mkb','exact_2mkb3']
-    FLAGS.data_file =df_list[1] 
-    FLAGS.KB_file =kb_list[1]
+    FLAGS.data_file =df_list[0] 
+    FLAGS.KB_file =kb_list[0]
 elif FLAGS.dataset == 'pq':
     FLAGS.data_dir = "data/PQ"
     df_list = ['2H','3H']
@@ -74,15 +74,12 @@ def main(_):
         Q,A,P,D,S,_,_,_,_,_,Triples,KBs,FLAGS.query_size,FLAGS.mem_size,FLAGS.tails_size= process_data(KB_file, data_file, word2id, rel2id, ent2id, words, relations, entities)
         FLAGS.path_size = len(P[0]) #5 or 7 or 
 
+    FLAGS.nhop = FLAGS.path_size / 2
 
     print ("read data cost %f seconds" %(time.time()-start))
     FLAGS.nwords = len(word2id) 
     FLAGS.nrels = len(rel2id) 
     FLAGS.nents = len(ent2id)
-    if FLAGS.data_file == "CPQ-2hop":
-        FLAGS.nhop = (FLAGS.path_size-1)/4
-    else:
-        FLAGS.nhop = (FLAGS.path_size-1)/2
     
     trainQ, testQ, trainA, testA, trainP, testP, trainD, testD, trainS, testS = cross_validation.train_test_split(Q, A, P, D, S, test_size=.1, random_state=123)
     trainQ, validQ, trainA, validA, trainP, validP, trainD, validD, trainS, validS = cross_validation.train_test_split(trainQ, trainA, trainP, trainD, trainS, test_size=.11, random_state=0)
@@ -214,6 +211,7 @@ def main(_):
             pre_val_preds = model.predict(KBs, validQ, validP)
             pre_test_preds = model.predict(Triples, testQ, testP)
             best_val_epoch = -1
+            best_val_acc = MultiAcc_C(validP,pre_val_preds)
             best_val_true_acc = InSet(validP,validS,pre_val_preds)
             best_test_true_acc = InSet(testP,testS,pre_test_preds)
             best_test_path_acc = best_val_acc
@@ -351,6 +349,7 @@ def main(_):
        
 
         elif FLAGS.model == 'MemN2N' or FLAGS.model =='KVMemN2N':
+
             if FLAGS.model == "MemN2N":
                 model = MemN2N(FLAGS,sess)
             elif FLAGS.model == "KVMemN2N":
@@ -360,7 +359,8 @@ def main(_):
 
             pre_val_preds, pre_val_lists = model.predict(validD, validQ, validP) #(batch,)
             best_val_epoch = -1
-            best_val_acc = MultiAcc(validP,pre_val_lists,FLAGS.path_size)
+            #best_val_acc = MultiAcc(validP,pre_val_lists,FLAGS.path_size)
+            best_val_acc = metrics.accuracy_score(valid_labels,pre_val_preds)
             best_val_true_acc = InSet(validP,validS,pre_val_preds)
             best_test_true_acc = best_val_true_acc
             best_test_path_acc = best_val_acc
@@ -384,16 +384,16 @@ def main(_):
                     val_true_acc = InSet(validP,validS,val_preds)
                     test_true_acc = InSet(testP,testS,test_preds)
 
-                    '''
+                    
                     train_acc = metrics.accuracy_score(train_labels,train_preds)
                     val_acc = metrics.accuracy_score(valid_labels,val_preds)
                     test_acc = metrics.accuracy_score(test_labels,test_preds)
+                    
                     '''
-
                     train_acc = MultiAcc(trainP,train_lists,FLAGS.path_size)
                     val_acc = MultiAcc(validP,val_lists,FLAGS.path_size)
                     test_acc = MultiAcc(testP,test_lists,FLAGS.path_size)
-
+                    '''
 
                     if val_true_acc > best_val_true_acc:
                         best_val_true_acc = val_true_acc
