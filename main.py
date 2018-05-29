@@ -412,8 +412,8 @@ def main(_):
                     print('Validation Accuracy:', val_true_acc)
                     print('Best Validation epoch:', best_val_epoch)
                     print('Best Validation Accuracy:', best_val_true_acc)
-                    print('Test Accuracy:', test_true_acc)
-                    print('Test Accuracy for whole path:', test_acc)
+                    print('Test Accuracy:', best_test_true_acc)
+                    print('Test Accuracy for whole path:', best_test_path_acc)
                     print('-----------------------')
 
         elif FLAGS.model == 'Seq2Seq':
@@ -481,8 +481,8 @@ def main(_):
                     print('Validation Accuracy:', val_true_acc)
                     print('Best Validation epoch:', best_val_epoch)
                     print('Best Validation Accuracy:', best_val_true_acc)
-                    print('Test Accuracy:', test_true_acc)
-                    print('Test Accuracy for whole path:', test_acc)
+                    print('Test Accuracy:', best_test_true_acc)
+                    print('Test Accuracy for whole path:', best_test_path_acc)
                     print('-----------------------')
 
 
