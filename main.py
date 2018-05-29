@@ -33,7 +33,7 @@ flags.DEFINE_boolean("unseen",False,"True to hide 3 relations when training [Fal
 FLAGS = flags.FLAGS
 if FLAGS.dataset == 'wc':
     FLAGS.data_dir = "data/WC2014"
-    FLAGS.data_file = "WC-P" #"WC-C/P1/P2/P"
+    FLAGS.data_file = "WC-C" #"WC-C/P1/P2/P"
     FLAGS.KB_file = "WC2014"
 elif FLAGS.dataset == 'pql':
     FLAGS.data_dir = "data/PQL"

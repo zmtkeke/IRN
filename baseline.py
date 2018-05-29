@@ -164,12 +164,6 @@ class MemN2N(object):
             r = tf.reshape(self._stories[:,:,1],[-1,d2,1])
             e2 = tf.reshape(self._stories[:,:,2],[-1,d2,1])
             
-            '''
-            d2 = self._stories.get_shape().as_list()[1] - 2 #memory 
-            e1 = tf.reshape(self._stories[:,2:,0],[-1,d2,1])
-            r = tf.reshape(self._stories[:,2:,1],[-1,d2,1])
-            e2 = tf.reshape(self._stories[:,2:,2],[-1,d2,1])
-            '''
             inner_loss = 0
             for hop in range(self._hops):
                 
@@ -179,9 +173,6 @@ class MemN2N(object):
                 m_2 = tf.nn.embedding_lookup(self.R, r) #shape is (batch,memory,1,embedding)
                 m_3 = tf.nn.embedding_lookup(self.A, e2) #shape is (batch,memory,1,embedding)
                 m_emb = tf.concat(axis=2,values=[m_1,m_2,m_3]) #shape is (batch,memory,3,embedding)
-                #m_emb_nodiff = tf.nn.embedding_lookup(self.A,self._stories)
-                #print m_emb_nodiff.get_shape().as_list()
-                #print m_emb.get_shape().as_list()
                 m = tf.reduce_sum(m_emb, 2) #+ self.TA #(batch,memory,embed)
 
 
@@ -207,28 +198,6 @@ class MemN2N(object):
                 o_k = tf.reduce_sum(c_temp * probs_temp, 2) #(b,e,m)->(b,e) sum_over_memoryslots
                 
 
-                
-                '''
-                m = tf.nn.embedding_lookup(self.A, tf.reshape(self._paths[:,0],[-1,1]) )#(b,1,e)
-                m_1 = tf.nn.embedding_lookup(self.R, tf.reshape(self._paths[:,1],[-1,1]) )#(b,1,e)
-                m_2 = tf.nn.embedding_lookup(self.A, tf.reshape(self._paths[:,2],[-1,1]) )#(b,1,e)
-                m_3 = tf.nn.embedding_lookup(self.R,tf.reshape(self._paths[:,3],[-1,1]) ) #(b,1,e)
-                #m_4 = tf.nn.embedding_lookup(self.A, tf.reshape(self._paths[:,4],[-1,1]) )#(b,1,e)
-                #m_1 = m_2 = mm
-                m = tf.concat(1,[m,m_1,m_2,m_3]) #(b,5,e)
-                mm = tf.nn.embedding_lookup(self.C, tf.reshape(self._paths[:,0],[-1,1]) )#(b,1,e)
-                mm_2 = tf.nn.embedding_lookup(self.C, tf.reshape(self._paths[:,2],[-1,1]) )#(b,1,e)
-                #mm_4 = tf.nn.embedding_lookup(self.C, tf.reshape(self._paths[:,4],[-1,1]) )#(b,1,e)
-                mm = tf.concat(1,[mm,m_1,mm_2,m_3]) #(b,5,e)
-
-                u_tmp = tf.expand_dims(u[-1], 1) #(b,1,e)
-                dotted = tf.reduce_sum(m * u_tmp, 2) #(b,1,e)*(b,5,e)->(b,5)
-                probs = tf.nn.softmax(dotted) #(b,5)
-                probs_temp = tf.expand_dims(probs, -1) #(b,5,1)
-
-                o_k = tf.reduce_sum(mm * probs_temp, 1) #(b,5,e)->(b,5,1)->(b,e) sum_over_memoryslots
-                '''
-
                 u_k = tf.matmul(u[-1], self.H) + o_k #(batch, embed)
                 # nonlinearity
                 #if self._nonlin:
@@ -240,9 +209,10 @@ class MemN2N(object):
                 al = tf.concat(axis=1,values=[al,tf.reshape(tf.cast(tf.zeros_like(a_index),tf.int32),[-1,1])])
                 al = tf.concat(axis=1,values=[al,tf.reshape(tf.cast(a_index,tf.int32),[-1,1])])
 
-                logits = tf.matmul(u_k, self.W)
-                real_ans_onehot = tf.one_hot(self._paths[:,2 * hop+2], self._ent_size, on_value=1.0, off_value=0.0, axis=-1) #(b,rel_size)
-                inner_loss = inner_loss + tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=real_ans_onehot)) #(b,1)
+                #additional supervision, wc-c is not applicable
+                #logits = tf.matmul(u_k, self.W)
+                #real_ans_onehot = tf.one_hot(self._paths[:,2 * hop+2], self._ent_size, on_value=1.0, off_value=0.0, axis=-1) #(b,rel_size)
+                #inner_loss = inner_loss + tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=real_ans_onehot)) #(b,1)
                 
             #u_k = tf.matmul(u[-1], self.H)
 
@@ -501,8 +471,9 @@ class KVMemN2N(object):
                 al = tf.concat(axis=1,values=[al,tf.reshape(tf.cast(tf.zeros_like(a_index),tf.int32),[-1,1])])
                 al = tf.concat(axis=1,values=[al,tf.reshape(tf.cast(a_index,tf.int32),[-1,1])])
 
-                real_ans_onehot = tf.one_hot(self._paths[:,2 * h+2], self._ent_size, on_value=1.0, off_value=0.0, axis=-1) #(b,rel_size)
-                inner_loss = inner_loss + tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=real_ans_onehot)) #(b,1)
+                #additional supervision, wc-c is not applicable
+                #real_ans_onehot = tf.one_hot(self._paths[:,2 * h+2], self._ent_size, on_value=1.0, off_value=0.0, axis=-1) #(b,rel_size)
+                #inner_loss = inner_loss + tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=real_ans_onehot)) #(b,1)
 
                 u.append(u_k)
 
