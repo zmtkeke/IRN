@@ -7,7 +7,10 @@ PQL-3H/PQL-3H_more(PQL3-KB)
 data file: 
 each line includes: question, answer, answer set, answer path.
 each line follows below form:
+#for PQ:
 question	answer(answer1\answer2\…)	subject#r1#e1#r2#e2..#answer#<end>#answer
+#for PQL:
+question	answer(answer1\answer2\…)	subject#r1#e1#r2#e2..#answer
 
 
 kb file:
