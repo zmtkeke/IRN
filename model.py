@@ -13,7 +13,6 @@ class IRN(object):
         self._vocab_size = config.nwords 
         self._rel_size = config.nrels
         self._ent_size = config.nents
-        self._tail_size = config.tails_size  #3rd-dim of KB-matrix
         self._sentence_size = config.query_size
         self._embedding_size = config.edim
         self._path_size = config.path_size
@@ -33,7 +32,7 @@ class IRN(object):
 
         self._build_inputs()
         self._build_vars()
-        self._saver = tf.train.Saver(max_to_keep=10)
+        self._saver = tf.train.Saver(max_to_keep=1)
 
 
         self._encoding = tf.constant(position_encoding(self._sentence_size, self._embedding_size), name="encoding")
@@ -308,7 +307,6 @@ class IRN_C(object):
         self._vocab_size = config.nwords 
         self._rel_size = config.nrels
         self._ent_size = config.nents
-        self._tail_size = config.tails_size  #3rd-dim of KB-matrix
         self._sentence_size = config.query_size
         self._embedding_size = config.edim
         self._path_size = config.path_size
