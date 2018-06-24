@@ -255,7 +255,8 @@ def read_data(data_file, words):
         qlist = line[0].strip().split()
         k = line[1].find('(') 
         if not k == -1:
-            k += (line[1][k+1:-1].find('(') + 1)
+            if line[1][k-1] == '_':
+                k += (line[1][k+1:-1].find('(') + 1)
             asset = line[1][k+1:-1]
             line[1]=line[1][:k]
         else:
