@@ -21,7 +21,7 @@ flags.DEFINE_float("epsilon", 1e-8, "Epsilon value for Adam Optimizer.")
 #flags.DEFINE_float("init_hid", 0.1, "initial internal state value [0.1]")
 #flags.DEFINE_float("init_std", 0.05, "weight initialization std [0.05]")
 flags.DEFINE_float("max_grad_norm", 20, "clip gradients to this norm [20]")
-flags.DEFINE_string("dataset", "pq", "pq/pql/wc/")
+flags.DEFINE_string("dataset", "pq2h", "pq/pql/wc/")
 flags.DEFINE_string("checkpoint_dir", "checkpoint", "checkpoint directory")
 flags.DEFINE_boolean("unseen",False,"True to hide 3 relations when training [False]")
 FLAGS = flags.FLAGS
