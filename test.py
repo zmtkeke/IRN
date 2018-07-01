@@ -24,6 +24,9 @@ flags.DEFINE_float("max_grad_norm", 20, "clip gradients to this norm [20]")
 flags.DEFINE_string("dataset", "pq", "pq2h/pq3h/pql2h/pql3h/wc/")
 flags.DEFINE_string("checkpoint_dir", "checkpoint", "checkpoint directory")
 flags.DEFINE_boolean("unseen",False,"True to hide 3 relations when training [False]")
+flags.DEFINE_boolean("show_case_only",False,"True to show case")
+flags.DEFINE_integer("show_case_no",10, "show the case in the test file")
+
 FLAGS = flags.FLAGS
 
 FLAGS.data_dir = "data/WC2014"
@@ -104,6 +107,7 @@ def main(_):
     #other data and some flags
     #
     id2word = dict(zip(word2id.values(), word2id.keys()))
+    id2ent = dict(zip(ent2id.values(), ent2id.keys()))
     id2rel = dict(zip(rel2id.values(), rel2id.keys())) #{0: '<end>', 1: 'cause_of_death', 2: 'gender', 3: 'profession', 4: 'institution', 5: 'religion', 6: 'parents', 7: 'location', 8: 'place_of_birth', 9: 'nationality', 10: 'place_of_death', 11: 'spouse', 12: 'children', 13: 'ethnicity'} 
 
     test_labels = np.argmax(testA, axis=1)
@@ -128,12 +132,33 @@ def main(_):
 
         test_true_acc = InSet(testP,testS,test_preds)
 
+        show_k = FLAGS.show_case_no if FLAGS.show_case_no < testQ.shape[0]  else 0
+        input_q = " ".join([id2word[w] for w in testQ[show_k]])
+        #output = test_preds[0][0]
+        path_words = []
+        for j in range(FLAGS.path_size):
+            if j % 2 == 0:
+                path_words.append(id2ent[test_preds[show_k][j]])
+            else:
+                path_words.append(id2rel[test_preds[show_k][j]])
+        output = "---".join(path_words)
+
+        if FLAGS.show_case_only:
+            print('-----------------------')
+            print('test input:',input_q)
+            print('test output:',output)                   
+            print('-----------------------')
+            return
+
 
         print('-----------------------')
         print('Test Data',data_file)
         print('Test Accuracy:', test_true_acc)
         print('Test Accuracy for whole Path:', test_acc)                    
         print('-----------------------')
+
+
+
 
 
 
